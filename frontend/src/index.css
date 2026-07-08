@@ -6,7 +6,7 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-800 transition-colors duration-300 font-sans;
+    @apply bg-slate-50 text-slate-900 transition-colors duration-300 font-sans;
   }
   
   body.dark {
@@ -25,12 +25,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.2);
+  background: rgba(161, 161, 170, 0.2);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.4);
+  background: rgba(212, 175, 55, 0.4);
 }
 
 .dark ::-webkit-scrollbar-thumb {
@@ -38,22 +38,22 @@
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.4);
+  background: rgba(212, 175, 55, 0.4);
 }
 
 /* Glassmorphism helpers */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .dark .glass-panel {
-  background: rgba(22, 27, 38, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(22, 22, 26, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 /* Waveform sound preview bar animations */
@@ -76,7 +76,7 @@
   display: inline-block;
   width: 3px;
   height: 4px;
-  background-color: #8b5cf6;
+  background-color: #d4af37;
   border-radius: 2px;
   margin: 0 1px;
   vertical-align: middle;

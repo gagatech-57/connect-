@@ -9,31 +9,32 @@ export default {
     extend: {
       colors: {
         brand: {
-          50: '#f5f3ff',
-          100: '#ede9fe',
-          200: '#ddd6fe',
-          300: '#c084fc',
-          400: '#a855f7',
-          500: '#8b5cf6',
-          600: '#7c3aed',
-          700: '#6d28d9',
-          800: '#5b21b6',
-          900: '#4c1d95',
+          50: '#fdfbf7',
+          100: '#f9f3db',
+          200: '#f1e2b2',
+          300: '#e5ca80',
+          400: '#d7af4e',
+          500: '#d4af37', // Luxury Metallic Gold
+          600: '#bfa030', // Deep Gold Accent
+          700: '#9d8125',
+          800: '#7a621c',
+          900: '#5a4614',
         },
         dark: {
-          bg: '#0b0f19',        // Slate/Indigo deep dark background
-          card: '#161b26',      // Slate/Indigo card background
-          border: '#232b3c',    // Slate/Indigo border color
-          text: '#f3f4f6',      // Light gray text
-          muted: '#9ca3af',     // Muted gray text
+          bg: '#09090b',        // Premium pitch black
+          card: '#16161a',      // Premium charcoal panel
+          border: '#27272a',    // Zinc border lines
+          text: '#f4f4f5',      // Ice white text
+          muted: '#a1a1aa',     // Muted zinc gray text
         }
       },
       fontFamily: {
         sans: ['Outfit', 'Inter', 'sans-serif'],
       },
       boxShadow: {
-        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
-        'glass-light': '0 8px 32px 0 rgba(99, 102, 241, 0.1)',
+        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.5)',
+        'glass-light': '0 8px 32px 0 rgba(212, 175, 55, 0.05)',
+        'gold-glow': '0 4px 20px 0 rgba(212, 175, 55, 0.15)',
       }
     },
   },
