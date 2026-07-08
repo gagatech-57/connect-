@@ -33,15 +33,26 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
-// Configure allowed CORS origins
-const allowedOrigins = process.env.CLIENT_URL 
-  ? [process.env.CLIENT_URL] 
-  : ['https://connect-plum-ten.vercel.app', 'http://localhost:5173'];
+// Configure dynamic CORS origin validation
+const corsOriginCheck = (origin, callback) => {
+  if (!origin) return callback(null, true);
+  
+  const isAllowed = origin.endsWith('.vercel.app') ||
+                    origin.startsWith('http://localhost:') ||
+                    origin.startsWith('http://127.0.0.1:') ||
+                    (process.env.CLIENT_URL && origin === process.env.CLIENT_URL);
+                    
+  if (isAllowed) {
+    callback(null, true);
+  } else {
+    callback(new Error('Not allowed by CORS'));
+  }
+};
 
 // Initialize Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: corsOriginCheck,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   },
@@ -54,7 +65,7 @@ initSocket(io);
 app.use(helmet());
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: corsOriginCheck,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   })
