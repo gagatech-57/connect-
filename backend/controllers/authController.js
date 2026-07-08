@@ -26,47 +26,38 @@ export const register = async (req, res, next) => {
     const existingUserByUsername = await User.findOne({ username });
 
     if (existingUserByEmail) {
-      return res.status(400).json({ success: false, message: 'Email already registered' });
+      if (existingUserByEmail.isEmailVerified) {
+        return res.status(400).json({ success: false, message: 'Email already registered' });
+      } else {
+        // User exists but isn't verified yet. Update details.
+        existingUserByEmail.username = username;
+        existingUserByEmail.fullName = fullName;
+        existingUserByEmail.password = password; // pre-save will hash it
+        await existingUserByEmail.save();
+
+        // Send OTP
+        await handleOTPSending(email, res);
+        return;
+      }
     }
 
     if (existingUserByUsername) {
       return res.status(400).json({ success: false, message: 'Username is already taken' });
     }
 
-    // Create the verified user (bypassing OTP)
+    // Create the unverified user
     const newUser = new User({
       username,
       fullName,
       email,
       password,
-      isEmailVerified: true, // Auto-verified!
+      isEmailVerified: false,
     });
 
     await newUser.save();
 
-    // Generate tokens & log user in immediately
-    const accessToken = generateAccessToken(newUser._id);
-    const refreshToken = generateRefreshToken(newUser._id);
-
-    sendRefreshTokenCookie(res, refreshToken);
-
-    return res.status(201).json({
-      success: true,
-      message: 'User registered and logged in successfully',
-      token: accessToken,
-      user: {
-        _id: newUser._id,
-        username: newUser.username,
-        fullName: newUser.fullName,
-        email: newUser.email,
-        avatar: newUser.avatar,
-        bio: newUser.bio,
-        statusMessage: newUser.statusMessage,
-        isEmailVerified: newUser.isEmailVerified,
-        onlineStatus: newUser.onlineStatus,
-        lastSeen: newUser.lastSeen,
-      },
-    });
+    // Send OTP
+    await handleOTPSending(email, res);
   } catch (error) {
     next(error);
   }
@@ -75,35 +66,11 @@ export const register = async (req, res, next) => {
 // Helper for OTP generation, rate limiting, and sending
 const handleOTPSending = async (email, res) => {
   const otp = generateOTP();
-  const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes expiration
+  const expiresAt = new Date(Date.now() + 60 * 1000); // 60 seconds expiration
 
   let otpRecord = await OTPVerification.findOne({ email });
 
   if (otpRecord) {
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-
-    // Check if resending too fast (60 seconds)
-    const timeDiff = Date.now() - new Date(otpRecord.lastRequestedAt).getTime();
-    if (timeDiff < 60 * 1000) {
-      return res.status(429).json({
-        success: false,
-        message: 'Please wait 60 seconds before requesting another OTP.',
-      });
-    }
-
-    // Reset hour count if last requested was over an hour ago
-    if (otpRecord.lastRequestedAt < oneHourAgo) {
-      otpRecord.requestsCount = 1;
-    } else {
-      if (otpRecord.requestsCount >= 5) {
-        return res.status(429).json({
-          success: false,
-          message: 'Maximum of 5 OTP requests per hour exceeded. Please try again later.',
-        });
-      }
-      otpRecord.requestsCount += 1;
-    }
-
     otpRecord.otp = otp;
     otpRecord.attempts = 0;
     otpRecord.expiresAt = expiresAt;
@@ -155,17 +122,7 @@ export const verifyOTP = async (req, res, next) => {
       });
     }
 
-    // Increment attempts
-    otpRecord.attempts += 1;
-    await otpRecord.save();
 
-    if (otpRecord.attempts > 5) {
-      await OTPVerification.deleteOne({ email });
-      return res.status(400).json({
-        success: false,
-        message: 'OTP has expired',
-      });
-    }
 
     // Check code match
     if (otpRecord.otp !== otp) {
@@ -250,10 +207,19 @@ export const login = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Invalid email or password' });
     }
 
-    // Auto-verify if email is not verified (for ease of testing)
+    // Check if email is verified
     if (!user.isEmailVerified) {
-      user.isEmailVerified = true;
-      await user.save();
+      try {
+        await handleOTPSending(email, res);
+      } catch (otpErr) {
+        console.error('Failed to auto-resend OTP during unverified login:', otpErr);
+        return res.status(403).json({
+          success: false,
+          message: 'Email not verified. Also failed to send fresh OTP. Contact support.',
+          isEmailVerified: false,
+        });
+      }
+      return; // handleOTPSending sends response
     }
 
     // Set online presence
