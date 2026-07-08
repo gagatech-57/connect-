@@ -24,7 +24,8 @@ const socketAuth = async (socket, next) => {
       return next(new Error('Authentication failed: Token missing'));
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+    const secret = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET || 'fallback_secret_key';
+    const decoded = jwt.verify(token, secret);
     const user = await User.findById(decoded.id).select('-password');
 
     if (!user) {
