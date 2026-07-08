@@ -22,7 +22,8 @@ import {
   CornerDownRight,
   SmilePlus,
   Loader2,
-  FileText
+  FileText,
+  MessageSquare
 } from 'lucide-react';
 
 export default function ChatArea({ setShowGroupDetails, setProfileDrawerOpen }) {
