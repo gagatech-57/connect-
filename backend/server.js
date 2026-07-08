@@ -33,10 +33,15 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
+// Configure allowed CORS origins
+const allowedOrigins = process.env.CLIENT_URL 
+  ? [process.env.CLIENT_URL] 
+  : ['https://connect-plum-ten.vercel.app', 'http://localhost:5173'];
+
 // Initialize Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   },
@@ -49,7 +54,7 @@ initSocket(io);
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   })
