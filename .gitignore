@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+/backend/node_modules/
+/frontend/node_modules/
+
+# Production builds
+/frontend/dist/
+
+# Local env files
+.env
+/backend/.env
+/frontend/.env
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Developer scratch files and logs
+.gemini/
+/scratch/
+*.log

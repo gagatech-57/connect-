@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-800 transition-colors duration-300 font-sans;
+  }
+  
+  body.dark {
+    @apply bg-dark-bg text-dark-text;
+  }
+}
+
+/* Custom premium scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.2);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.4);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.4);
+}
+
+/* Glassmorphism helpers */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.dark .glass-panel {
+  background: rgba(22, 27, 38, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Waveform sound preview bar animations */
+@keyframes quiet {
+  0%, 100% { height: 4px; }
+  50% { height: 4px; }
+}
+
+@keyframes normal-wave {
+  0%, 100% { height: 4px; }
+  50% { height: 16px; }
+}
+
+@keyframes loud {
+  0%, 100% { height: 4px; }
+  50% { height: 28px; }
+}
+
+.wave-bar {
+  display: inline-block;
+  width: 3px;
+  height: 4px;
+  background-color: #8b5cf6;
+  border-radius: 2px;
+  margin: 0 1px;
+  vertical-align: middle;
+}
+
+.wave-bar.quiet { animation: quiet 1.2s ease-in-out infinite; }
+.wave-bar.normal { animation: normal-wave 1.2s ease-in-out infinite; }
+.wave-bar.loud { animation: loud 1.2s ease-in-out infinite; }
