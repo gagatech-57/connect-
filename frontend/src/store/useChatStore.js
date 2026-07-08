@@ -28,7 +28,7 @@ export const useChatStore = create((set, get) => {
       const token = localStorage.getItem('accessToken');
       if (!token || socketInstance) return;
 
-      const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:5000';
+      const serverUrl = import.meta.env.VITE_SERVER_URL || 'https://connect-vlil.onrender.com';
       
       socketInstance = io(serverUrl, {
         auth: { token },
