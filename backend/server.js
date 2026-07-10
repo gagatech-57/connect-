@@ -5,7 +5,6 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
 
 // Config
 import connectDB from './config/db.js';
@@ -25,19 +24,24 @@ import messageRoutes from './routes/messageRoutes.js';
 import groupRoutes from './routes/groupRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 
-dotenv.config();
+// Validate required environment variables at startup
+const hasDB = process.env.MONGO_URI || process.env.MONGODB_URI;
+const hasJWT = process.env.JWT_SECRET || process.env.JWT_ACCESS_SECRET;
+
+if (!hasDB) {
+  console.error("FATAL STARTUP ERROR: Database connection string (MONGO_URI or MONGODB_URI) is missing.");
+  process.exit(1);
+}
+
+if (!hasJWT) {
+  console.error("FATAL STARTUP ERROR: JWT secret (JWT_SECRET or JWT_ACCESS_SECRET) is missing.");
+  process.exit(1);
+}
 
 // Connect to Database
 connectDB();
 
 const app = express();
-
-// Request logging middleware
-app.use((req, res, next) => {
-  console.log(`[REQUEST LOG] ${req.method} ${req.originalUrl} - Origin: ${req.headers.origin}`);
-  next();
-});
-
 const server = http.createServer(app);
 
 // Configure dynamic CORS origin validation
@@ -72,18 +76,44 @@ const io = new Server(server, {
 
 initSocket(io);
 
-// Security & Standard Middlewares (CORS registered BEFORE all other route handlers)
+// 1. CORS Middleware (Mounted FIRST)
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // Handle OPTIONS preflight requests
-app.use(helmet());
+app.options('*', cors(corsOptions)); // OPTIONS preflight
+
+// 2. Parser Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Apply global rate limiting to all REST APIs
+// 3. Security Middleware
+app.use(helmet());
+
+// 4. Request Logging Middleware (logs Method, URL, Origin, and Status Code on finish)
+app.use((req, res, next) => {
+  res.on('finish', () => {
+    console.log(`[REQUEST] ${req.method} ${req.originalUrl} - Status: ${res.statusCode} - Origin: ${req.headers.origin || 'N/A'}`);
+  });
+  next();
+});
+
+// 5. Health Endpoints
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Backend is running"
+  });
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: "ok"
+  });
+});
+
+// Apply global rate limiting to all REST APIs under /api
 app.use('/api', apiLimiter);
 
-// API routes
+// 6. Registered API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/friends', friendRoutes);
@@ -91,17 +121,14 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/notifications', notificationRoutes);
 
-// Base route for server status
-app.get('/health', (req, res) => {
-  res.status(200).json({ success: true, message: 'Gaga Connect backend server is healthy and running.' });
-});
-
-// Error handling fallback
+// 7. Error Handling Fallbacks (Mounted AFTER all routes)
 app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  console.log(`✓ Server Running on port ${PORT}`);
+  console.log(`✓ Registered Routes: /api/auth, /api/users, /api/friends, /api/messages, /api/groups, /api/notifications`);
+  console.log(`✓ CORS Enabled for: https://connect-vfe9.vercel.app, *.vercel.app, and localhost`);
 });

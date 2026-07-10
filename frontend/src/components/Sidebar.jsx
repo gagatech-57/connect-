@@ -16,7 +16,8 @@ import {
   Clock,
   Check,
   CheckCheck,
-  Plus
+  Plus,
+  Loader2
 } from 'lucide-react';
 
 export default function Sidebar({ setSidebarView, setShowGroupModal, setProfileDrawerOpen }) {

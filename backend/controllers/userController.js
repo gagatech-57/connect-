@@ -113,3 +113,15 @@ export const searchUsers = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get all users
+// @route   GET /api/users
+// @access  Private
+export const getUsers = async (req, res, next) => {
+  try {
+    const users = await User.find({ _id: { $ne: req.user._id } }).select('-password');
+    res.status(200).json({ success: true, users });
+  } catch (error) {
+    next(error);
+  }
+};

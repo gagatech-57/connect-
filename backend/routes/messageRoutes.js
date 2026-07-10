@@ -13,6 +13,7 @@ import {
   toggleArchiveConversation,
   togglePinConversation,
   markConversationAsSeen,
+  getAllMessages
 } from '../controllers/messageController.js';
 import { protect, requireEmailVerified } from '../middleware/auth.js';
 import upload from '../middleware/upload.js';
@@ -22,6 +23,7 @@ const router = express.Router();
 router.use(protect);
 router.use(requireEmailVerified);
 
+router.get('/', getAllMessages);
 router.get('/conversations', getConversations);
 router.post('/', upload.single('media'), sendMessage);
 router.get('/:conversationId', getMessages);

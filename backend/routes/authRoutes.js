@@ -9,6 +9,7 @@ import {
   forgotPassword,
   resetPassword,
   changePassword,
+  getMe
 } from '../controllers/authController.js';
 import { protect } from '../middleware/auth.js';
 import { authLimiter } from '../middleware/rateLimiter.js';
@@ -38,5 +39,6 @@ router.post('/refresh', refresh);
 // Protected routes (require authorization header)
 router.post('/logout', protect, logout);
 router.put('/change-password', protect, changePasswordValidator, validateRequest, changePassword);
+router.get('/me', protect, getMe);
 
 export default router;

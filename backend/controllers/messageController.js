@@ -145,6 +145,20 @@ export const sendMessage = async (req, res, next) => {
   }
 };
 
+// @desc    Get all messages sent by current user (for test verification)
+// @route   GET /api/messages
+// @access  Private
+export const getAllMessages = async (req, res, next) => {
+  try {
+    const messages = await Message.find({ sender: req.user._id })
+      .populate('sender', 'username fullName avatar')
+      .sort({ createdAt: -1 });
+    res.status(200).json({ success: true, messages });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get messages in a conversation
 // @route   GET /api/messages/:conversationId
 // @access  Private
