@@ -17,7 +17,7 @@ const generateOTP = () => {
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
-export const register = async (req, res, next) => {
+export const registerUser = async (req, res, next) => {
   const { username, fullName, email, password } = req.body;
 
   try {

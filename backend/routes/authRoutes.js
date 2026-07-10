@@ -1,6 +1,6 @@
 import express from 'express';
 import {
-  register,
+  registerUser,
   verifyOTP,
   resendOTP,
   login,
@@ -25,7 +25,7 @@ import {
 const router = express.Router();
 
 // Apply auth rate limiting on sensitive, publicly exposed endpoints
-router.post('/register', authLimiter, registerValidator, validateRequest, register);
+router.post('/register', authLimiter, registerValidator, validateRequest, registerUser);
 router.post('/verify-otp', authLimiter, otpVerifyValidator, validateRequest, verifyOTP);
 router.post('/resend-otp', authLimiter, emailOnlyValidator, validateRequest, resendOTP);
 router.post('/login', authLimiter, loginValidator, validateRequest, login);

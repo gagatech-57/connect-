@@ -31,6 +31,13 @@ dotenv.config();
 connectDB();
 
 const app = express();
+
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`[REQUEST LOG] ${req.method} ${req.originalUrl} - Origin: ${req.headers.origin}`);
+  next();
+});
+
 const server = http.createServer(app);
 
 // Configure dynamic CORS origin validation
