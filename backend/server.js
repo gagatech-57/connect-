@@ -37,7 +37,8 @@ const server = http.createServer(app);
 const corsOriginCheck = (origin, callback) => {
   if (!origin) return callback(null, true);
   
-  const isAllowed = origin.endsWith('.vercel.app') ||
+  const isAllowed = origin === 'https://connect-vfe9.vercel.app' ||
+                    origin.endsWith('.vercel.app') ||
                     origin.startsWith('http://localhost:') ||
                     origin.startsWith('http://127.0.0.1:') ||
                     (process.env.CLIENT_URL && origin === process.env.CLIENT_URL);
@@ -49,27 +50,25 @@ const corsOriginCheck = (origin, callback) => {
   }
 };
 
+const corsOptions = {
+  origin: corsOriginCheck,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+};
+
 // Initialize Socket.IO
 const io = new Server(server, {
-  cors: {
-    origin: corsOriginCheck,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true,
-  },
+  cors: corsOptions,
   maxHttpBufferSize: 1e8, // Allow up to 100MB message sizes (for large document/video transfers)
 });
 
 initSocket(io);
 
-// Security & Standard Middlewares
+// Security & Standard Middlewares (CORS registered BEFORE all other route handlers)
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Handle OPTIONS preflight requests
 app.use(helmet());
-app.use(
-  cors({
-    origin: corsOriginCheck,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  })
-);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
