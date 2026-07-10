@@ -5,20 +5,27 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const connectDB = async () => {
-  // Support both MONGO_URI and MONGODB_URI to prevent deployment crashes
-  const mongoURI = process.env.MONGO_URI || process.env.MONGODB_URI;
+  const rawURI = process.env.MONGO_URI || process.env.MONGODB_URI;
 
-  if (!mongoURI) {
+  if (!rawURI) {
     console.error("MONGO_URI environment variable is missing.");
     process.exit(1);
   }
 
-  // Debugging logs
-  console.log("Database connection string exists:", !!mongoURI);
+  // Sanitize the URI by stripping < > brackets around credentials if present
+  let sanitizedURI = rawURI.trim();
+  if (sanitizedURI.includes('<') || sanitizedURI.includes('>')) {
+    sanitizedURI = sanitizedURI.replace(/<([^>]+)>/g, '$1');
+  }
+
+  // Safely print the URI by obfuscating the password portion for logs
+  const safeURI = sanitizedURI.replace(/\/\/([^:]+):([^@]+)@/, '//$1:****@');
+  console.log("MONGO_URI exists: true");
+  console.log("Connecting to Database:", safeURI);
 
   try {
-    const conn = await mongoose.connect(mongoURI);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    const conn = await mongoose.connect(sanitizedURI);
+    console.log("Connected to MongoDB");
   } catch (error) {
     console.error(`MongoDB Connection Error: ${error.message}`);
     process.exit(1);
