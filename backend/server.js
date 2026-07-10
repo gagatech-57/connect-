@@ -34,8 +34,10 @@ if (!hasDB) {
 }
 
 if (!hasJWT) {
-  console.error("FATAL STARTUP ERROR: JWT secret (JWT_SECRET or JWT_ACCESS_SECRET) is missing.");
-  process.exit(1);
+  console.warn("WARNING: JWT secret is missing. Falling back to default development secret key.");
+  process.env.JWT_SECRET = 'gaga_access_key_123_dev_secret_key';
+  process.env.JWT_ACCESS_SECRET = 'gaga_access_key_123_dev_secret_key';
+  process.env.JWT_REFRESH_SECRET = 'gaga_refresh_key_123_dev_secret_key';
 }
 
 // Connect to Database
