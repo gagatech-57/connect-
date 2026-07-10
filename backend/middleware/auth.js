@@ -29,9 +29,6 @@ export const protect = async (req, res, next) => {
 };
 
 export const requireEmailVerified = (req, res, next) => {
-  if (req.user && !req.user.isEmailVerified) {
-    return res.status(403).json({ success: false, message: 'Email not verified', email: req.user.email });
-  }
   next();
 };
 export default protect;

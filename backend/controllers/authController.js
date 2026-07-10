@@ -26,38 +26,47 @@ export const register = async (req, res, next) => {
     const existingUserByUsername = await User.findOne({ username });
 
     if (existingUserByEmail) {
-      if (existingUserByEmail.isEmailVerified) {
-        return res.status(400).json({ success: false, message: 'Email already registered' });
-      } else {
-        // User exists but isn't verified yet. Update details.
-        existingUserByEmail.username = username;
-        existingUserByEmail.fullName = fullName;
-        existingUserByEmail.password = password; // pre-save will hash it
-        await existingUserByEmail.save();
-
-        // Send OTP
-        await handleOTPSending(email, res);
-        return;
-      }
+      return res.status(400).json({ success: false, message: 'Email already registered' });
     }
 
     if (existingUserByUsername) {
       return res.status(400).json({ success: false, message: 'Username is already taken' });
     }
 
-    // Create the unverified user
+    // Create the verified user (bypassing OTP)
     const newUser = new User({
       username,
       fullName,
       email,
       password,
-      isEmailVerified: false,
+      isEmailVerified: true, // Auto-verified!
     });
 
     await newUser.save();
 
-    // Send OTP
-    await handleOTPSending(email, res);
+    // Generate tokens & log user in immediately
+    const accessToken = generateAccessToken(newUser._id);
+    const refreshToken = generateRefreshToken(newUser._id);
+
+    sendRefreshTokenCookie(res, refreshToken);
+
+    return res.status(201).json({
+      success: true,
+      message: 'User registered and logged in successfully',
+      token: accessToken,
+      user: {
+        _id: newUser._id,
+        username: newUser.username,
+        fullName: newUser.fullName,
+        email: newUser.email,
+        avatar: newUser.avatar,
+        bio: newUser.bio,
+        statusMessage: newUser.statusMessage,
+        isEmailVerified: newUser.isEmailVerified,
+        onlineStatus: newUser.onlineStatus,
+        lastSeen: newUser.lastSeen,
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -207,20 +216,7 @@ export const login = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Invalid email or password' });
     }
 
-    // Check if email is verified
-    if (!user.isEmailVerified) {
-      try {
-        await handleOTPSending(email, res);
-      } catch (otpErr) {
-        console.error('Failed to auto-resend OTP during unverified login:', otpErr);
-        return res.status(403).json({
-          success: false,
-          message: 'Email not verified. Also failed to send fresh OTP. Contact support.',
-          isEmailVerified: false,
-        });
-      }
-      return; // handleOTPSending sends response
-    }
+
 
     // Set online presence
     user.onlineStatus = true;
